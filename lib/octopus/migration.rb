@@ -29,8 +29,6 @@ module Octopus
       def using(*args)
         return self unless connection.is_a?(Octopus::Proxy)
 
-        ::Thread.current['using_called'] = true
-
         self.current_shard = args
         self
       end

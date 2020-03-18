@@ -270,7 +270,7 @@ module Octopus
 
     # Try to use slaves if and only if `replicated: true` is specified in `shards.yml` and no slaves groups are defined
     def should_send_queries_to_replicated_databases?(method)
-      replicated && method.to_s =~ /select/ && (!block || !Thread.current['using_called']) && !slaves_grouped?
+      replicated && method.to_s =~ /select/ && (!block || !using_called) && !slaves_grouped?
     end
 
     def send_queries_to_selected_slave(method, *args, &block)

@@ -21,7 +21,6 @@ module Octopus
     end
 
     def using(shard)
-      ::Thread.current['using_called'] = true
       fail "Nonexistent Shard Name: #{shard}" if @klass.connection.shards[shard].nil?
       @current_shard = shard
       self
@@ -38,6 +37,7 @@ module Octopus
       if @klass.custom_octopus_connection && @klass.allowed_shard?(@current_shard)
         # Force use of proxy, given we called 'using' explicitly to get here
         @klass.connection_proxy.current_model = @klass
+        @klass.connection_proxy.using_called = true
         @klass.connection_proxy
       else
         @klass.connection
