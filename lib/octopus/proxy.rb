@@ -7,6 +7,7 @@ module Octopus
     attr_accessor :proxy_config
 
     delegate :current_model, :current_model=,
+             :using_called, :using_called=,
              :current_shard, :current_shard=,
              :current_group, :current_group=,
              :current_slave_group, :current_slave_group=,
@@ -269,7 +270,7 @@ module Octopus
 
     # Try to use slaves if and only if `replicated: true` is specified in `shards.yml` and no slaves groups are defined
     def should_send_queries_to_replicated_databases?(method)
-      replicated && method.to_s =~ /select/ && !block && !slaves_grouped?
+      replicated && method.to_s =~ /select/ && (!block || !Thread.current['using_called']) && !slaves_grouped?
     end
 
     def send_queries_to_selected_slave(method, *args, &block)

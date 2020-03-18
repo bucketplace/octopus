@@ -21,6 +21,7 @@ module Octopus
     end
 
     def using(shard)
+      ::Thread.current['using_called'] = true
       fail "Nonexistent Shard Name: #{shard}" if @klass.connection.shards[shard].nil?
       @current_shard = shard
       self

@@ -25,6 +25,14 @@ module Octopus
       Thread.current[CURRENT_MODEL_KEY] = model.is_a?(ActiveRecord::Base) ? model.class : model
     end
 
+    def using_called
+      Thread.current['using_called'] ||= false
+    end
+
+    def using_called=(val)
+      Thread.current['using_called'] = val
+    end
+
     def current_shard
       Thread.current[CURRENT_SHARD_KEY] ||= Octopus.master_shard
     end

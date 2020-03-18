@@ -10,6 +10,13 @@ module Octopus
 
     module SharedMethods
       def using(shard)
+        ::Thread.current['using_called'] = true
+        #if self.class == Class
+        #  self.connection_proxy.using_called = true
+        #else
+        #  self.class.connection_proxy.using_called = true
+        #end
+
         if block_given?
           raise Octopus::Exception, <<-EOF
 #{name}.using is not allowed to receive a block, it works just like a regular scope.
