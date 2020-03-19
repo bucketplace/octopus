@@ -2,6 +2,7 @@ module Octopus
   class ProxyConfig
     CURRENT_MODEL_KEY = 'octopus.current_model'.freeze
     CURRENT_SHARD_KEY = 'octopus.current_shard'.freeze
+    CURRENT_SHARD_DIRTY_KEY = 'octopus.current_shard_dirty'.freeze
     CURRENT_GROUP_KEY = 'octopus.current_group'.freeze
     CURRENT_SLAVE_GROUP_KEY = 'octopus.current_slave_group'.freeze
     CURRENT_LOAD_BALANCE_OPTIONS_KEY = 'octopus.current_load_balance_options'.freeze
@@ -23,6 +24,14 @@ module Octopus
 
     def current_model=(model)
       Thread.current[CURRENT_MODEL_KEY] = model.is_a?(ActiveRecord::Base) ? model.class : model
+    end
+
+    def current_shard_dirty
+      Thread.current[CURRENT_SHARD_DIRTY_KEY] ||= false
+    end
+
+    def current_shard_dirty=(value)
+      Thread.current[CURRENT_SHARD_DIRTY_KEY] = value
     end
 
     def current_shard

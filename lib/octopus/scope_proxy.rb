@@ -37,6 +37,7 @@ module Octopus
       if @klass.custom_octopus_connection && @klass.allowed_shard?(@current_shard)
         # Force use of proxy, given we called 'using' explicitly to get here
         @klass.connection_proxy.current_model = @klass
+        @klass.connection_proxy.current_shard_dirty = true
         @klass.connection_proxy
       else
         @klass.connection

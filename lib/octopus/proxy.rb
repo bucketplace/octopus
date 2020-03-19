@@ -8,6 +8,7 @@ module Octopus
 
     delegate :current_model, :current_model=,
              :current_shard, :current_shard=,
+             :current_shard_dirty, :current_shard_dirty=,
              :current_group, :current_group=,
              :current_slave_group, :current_slave_group=,
              :current_load_balance_options, :current_load_balance_options=,
@@ -269,7 +270,7 @@ module Octopus
 
     # Try to use slaves if and only if `replicated: true` is specified in `shards.yml` and no slaves groups are defined
     def should_send_queries_to_replicated_databases?(method)
-      replicated && method.to_s =~ /select/ && !block && !slaves_grouped?
+      replicated && method.to_s =~ /select/ && (!block || !current_shard_dirty) && !slaves_grouped?
     end
 
     def send_queries_to_selected_slave(method, *args, &block)
