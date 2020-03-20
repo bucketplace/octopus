@@ -133,11 +133,11 @@ describe Octopus, :shards => [] do
     describe '#with_association' do
       before do
         OctopusHelper.using_environment :production_replicated do
-          Client.create!(:name => 'Master Client')
+          master = Client.create!(:name => 'Master Client')
           OctopusHelper.clean_all_shards([:slave1, :slave2, :slave3, :slave4])
           Octopus.fully_replicated do
             4.times do |i|
-              client = Client.using(:"slave#{i + 1}").create!(:name => 'Master Client')
+              client = Client.using(:"slave#{i + 1}").create!(master.as_json)
               client.items << Item.using(:"slave#{i + 1}").create(:name => 'Slave Item')
               client.save
             end
