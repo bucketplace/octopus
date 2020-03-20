@@ -20,6 +20,7 @@ module OctopusHelper
   def self.clean_connection_proxy
     Thread.current['octopus.current_model'] = nil
     Thread.current['octopus.current_shard'] = nil
+    Thread.current['octopus.current_shard_dirty'] = false
     Thread.current['octopus.current_group'] = nil
     Thread.current['octopus.current_slave_group'] = nil
     Thread.current['octopus.block'] = nil

@@ -107,6 +107,7 @@ module Octopus
 
     def clean_connection_proxy
       self.current_shard = Octopus.master_shard
+      self.current_shard_dirty = false
       self.current_model = nil
       self.current_group = nil
       self.block = nil
@@ -336,6 +337,7 @@ module Octopus
     # Temporarily switch `current_shard` and run the block
     def using_shard(shard, &_block)
       older_shard = current_shard
+      older_dirty = current_shard_dirty
       older_slave_group = current_slave_group
       older_load_balance_options = current_load_balance_options
 
@@ -346,6 +348,7 @@ module Octopus
         yield
       ensure
         self.current_shard = older_shard
+        self.current_shard_dirty = older_dirty
         self.current_slave_group = older_slave_group
         self.current_load_balance_options = older_load_balance_options
       end
