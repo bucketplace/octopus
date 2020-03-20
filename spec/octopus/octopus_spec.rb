@@ -106,6 +106,14 @@ describe Octopus, :shards => [] do
       end
     end
 
+    it 'sends queries to master when forced to use master' do
+      OctopusHelper.using_environment :production_replicated do
+        Octopus.fully_replicated do
+          expect(User.using(:master).count).to eq(0)
+        end
+      end
+    end
+
     it 'allows nesting' do
       OctopusHelper.using_environment :production_replicated do
         Octopus.fully_replicated do

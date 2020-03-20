@@ -19,6 +19,7 @@ If you are trying to scope everything to a specific shard, use Octopus.using ins
         end
 
         if Octopus.enabled?
+          self.connection_proxy.current_shard_dirty = true
           Octopus::ScopeProxy.new(shard, self)
         else
           self
