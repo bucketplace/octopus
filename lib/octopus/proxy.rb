@@ -8,6 +8,7 @@ module Octopus
 
     delegate :current_model, :current_model=,
              :current_shard, :current_shard=,
+             :current_shard_dirty, :current_shard_dirty=,
              :current_group, :current_group=,
              :current_slave_group, :current_slave_group=,
              :current_load_balance_options, :current_load_balance_options=,
@@ -106,6 +107,7 @@ module Octopus
 
     def clean_connection_proxy
       self.current_shard = Octopus.master_shard
+      self.current_shard_dirty = false
       self.current_model = nil
       self.current_group = nil
       self.block = nil
@@ -269,7 +271,7 @@ module Octopus
 
     # Try to use slaves if and only if `replicated: true` is specified in `shards.yml` and no slaves groups are defined
     def should_send_queries_to_replicated_databases?(method)
-      replicated && method.to_s =~ /select/ && !block && !slaves_grouped?
+      replicated && method.to_s =~ /select/ && (!block || !current_shard_dirty) && !slaves_grouped?
     end
 
     def send_queries_to_selected_slave(method, *args, &block)
@@ -335,6 +337,7 @@ module Octopus
     # Temporarily switch `current_shard` and run the block
     def using_shard(shard, &_block)
       older_shard = current_shard
+      older_dirty = current_shard_dirty
       older_slave_group = current_slave_group
       older_load_balance_options = current_load_balance_options
 
@@ -345,6 +348,7 @@ module Octopus
         yield
       ensure
         self.current_shard = older_shard
+        self.current_shard_dirty = older_dirty
         self.current_slave_group = older_slave_group
         self.current_load_balance_options = older_load_balance_options
       end

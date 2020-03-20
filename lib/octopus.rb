@@ -141,6 +141,7 @@ module Octopus
     conn = ActiveRecord::Base.connection
 
     if conn.is_a?(Octopus::Proxy)
+      conn.current_shard_dirty = true
       conn.run_queries_on_shard(shard, &block)
     else
       yield

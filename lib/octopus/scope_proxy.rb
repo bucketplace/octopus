@@ -23,6 +23,7 @@ module Octopus
     def using(shard)
       fail "Nonexistent Shard Name: #{shard}" if @klass.connection.shards[shard].nil?
       @current_shard = shard
+      @klass.connection_proxy.current_shard_dirty = true
       self
     end
 

@@ -88,34 +88,86 @@ describe Octopus, :shards => [] do
   end
 
   describe '#fully_replicated' do
-    before do
-      OctopusHelper.using_environment :production_replicated do
-        OctopusHelper.clean_all_shards([:slave1, :slave2, :slave3, :slave4])
-        4.times { |i| User.using(:"slave#{i + 1}").create!(:name => 'Slave User') }
+    describe '#without_association' do
+      before do
+        OctopusHelper.using_environment :production_replicated do
+          OctopusHelper.clean_all_shards([:slave1, :slave2, :slave3, :slave4])
+          4.times { |i| User.using(:"slave#{i + 1}").create!(:name => 'Slave User') }
+        end
       end
-    end
 
-    it 'sends queries to slaves' do
-      OctopusHelper.using_environment :production_replicated do
-        expect(User.count).to eq(0)
-        4.times do |_i|
+      it 'sends queries to slaves' do
+        OctopusHelper.using_environment :production_replicated do
+          expect(User.count).to eq(0)
+          4.times do |_i|
+            Octopus.fully_replicated do
+              expect(User.count).to eq(1)
+            end
+          end
+        end
+      end
+
+      it 'sends queries to master when forced to use master' do
+        OctopusHelper.using_environment :production_replicated do
           Octopus.fully_replicated do
+            expect(User.using(:master).count).to eq(0)
+          end
+        end
+      end
+
+      it 'allows nesting' do
+        OctopusHelper.using_environment :production_replicated do
+          Octopus.fully_replicated do
+            expect(User.count).to eq(1)
+
+            Octopus.fully_replicated do
+              expect(User.count).to eq(1)
+            end
+
             expect(User.count).to eq(1)
           end
         end
       end
     end
 
-    it 'allows nesting' do
-      OctopusHelper.using_environment :production_replicated do
-        Octopus.fully_replicated do
-          expect(User.count).to eq(1)
-
+    describe '#with_association' do
+      before do
+        OctopusHelper.using_environment :production_replicated do
+          master = Client.create!(:name => 'Master Client')
+          OctopusHelper.clean_all_shards([:slave1, :slave2, :slave3, :slave4])
           Octopus.fully_replicated do
-            expect(User.count).to eq(1)
+            4.times do |i|
+              client = Client.using(:"slave#{i + 1}").create!(master.as_json)
+              client.items << Item.using(:"slave#{i + 1}").create(:name => 'Slave Item')
+              client.save
+            end
           end
+        end
+      end
 
-          expect(User.count).to eq(1)
+      it 'sends queries to slaves' do
+        OctopusHelper.using_environment :production_replicated do
+          4.times do |_i|
+            Octopus.fully_replicated do
+              expect(Client.last.items.count).to eq(1)
+            end
+          end
+        end
+      end
+
+      it 'sends queries to master when forced to use master' do
+        OctopusHelper.using_environment :production_replicated do
+          Octopus.fully_replicated do
+            expect(Client.using(:master).last.items.count).to eq(0)
+          end
+        end
+      end
+
+      it 'sends queries to slave when forced to use slave' do
+        OctopusHelper.using_environment :production_replicated do
+          Octopus.fully_replicated do
+            expect(Client.using(:slave1).last.items.count).to eq(1)
+          end
         end
       end
     end
