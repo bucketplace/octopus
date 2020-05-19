@@ -76,7 +76,7 @@ module Octopus
     end
 
     def current_slave_group
-      Thread.current[CURRENT_SLAVE_GROUP_KEY]
+      Thread.current[CURRENT_SLAVE_GROUP_KEY] || Octopus.default_slave_group
     end
 
     def current_slave_group=(slave_group_symbol)

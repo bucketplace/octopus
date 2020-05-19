@@ -40,6 +40,10 @@ module Octopus
     ((config && config[:master_shard]) || :master).to_sym
   end
 
+  def self.default_slave_group
+    config ? config[:default_slave_group].to_sym : nil
+  end
+
   # Public: Whether or not Octopus is configured and should hook into the
   # current environment. Checks the environments config option for the Rails
   # environment by default.
