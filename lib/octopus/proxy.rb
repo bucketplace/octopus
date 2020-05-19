@@ -182,8 +182,7 @@ module Octopus
     end
 
     def should_send_queries_to_slave_group?(method)
-      puts "proxy should_send: block = #{block}"
-      should_use_slaves_for_method?(method) && !block && slave_groups.try(:[], current_slave_group).present?
+      should_use_slaves_for_method?(method) && block != Octopus.master_shard && slave_groups.try(:[], current_slave_group).present?
     end
 
     def send_queries_to_slave_group(method, *args, &block)
