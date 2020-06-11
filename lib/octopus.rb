@@ -41,7 +41,7 @@ module Octopus
   end
 
   def self.default_slave_group
-    config ? config[:default_slave_group].to_sym : nil
+    config ? config[:default_slave_group]&.to_sym : nil
   end
 
   # Public: Whether or not Octopus is configured and should hook into the
